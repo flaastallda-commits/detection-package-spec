@@ -1,0 +1,26 @@
+title: Snowflake MFA Bypass Window Set
+id: 4f6d4c1b-8a54-4f1e-9d7c-3b4c5d6e7f01
+status: stable
+description: >-
+  Detect ALTER USER ... MINS_TO_BYPASS_MFA statements, which temporarily
+  disable MFA enforcement for a user — a legitimate helpdesk feature
+  routinely abused to sidestep MFA during account takeover.
+logsource:
+  product: snowflake
+  service: query_history
+detection:
+  selection:
+    QUERY_TEXT|contains: 'MINS_TO_BYPASS_MFA'
+  condition: selection
+falsepositives:
+  - Helpdesk-assisted device re-enrolment (verify ticket)
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.credential_access
+  - attack.t1556.006
+x-dps-investigation:
+  - Identify who set the bypass and for which user
+  - Verify a matching helpdesk ticket exists
+  - Check LOGIN_HISTORY for password-only logins during the bypass window
+  - Reset the bypass and re-enrol MFA if unauthorised
