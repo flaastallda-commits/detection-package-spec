@@ -1,0 +1,26 @@
+title: Snowflake Presigned URL Generation
+id: 3e7c5d2a-9b43-4e0f-8c6d-2a3b4c5d6e04
+status: stable
+description: >-
+  Detect GET_PRESIGNED_URL calls, which mint time-limited unauthenticated
+  download links for staged files — a low-noise way for insiders to hand data
+  out of the platform.
+logsource:
+  product: snowflake
+  service: query_history
+detection:
+  selection:
+    QUERY_TEXT|contains: 'GET_PRESIGNED_URL'
+  condition: selection
+falsepositives:
+  - Applications that legitimately serve staged files via presigned URLs
+level: medium
+tags:
+  - attack.collection
+  - attack.exfiltration
+  - attack.t1567
+x-dps-investigation:
+  - Identify the user/role and the staged file(s) referenced
+  - Assess sensitivity of the staged data
+  - Check volume/frequency of presigned-URL generation by this user
+  - Restrict stage privileges if not business-justified
