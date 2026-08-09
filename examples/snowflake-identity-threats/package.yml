@@ -1,0 +1,51 @@
+apiVersion: dps/v1
+kind: DetectionPackage
+
+metadata:
+  name: snowflake-identity-threats
+  version: 1.0.0
+  title: "Snowflake Identity Threats"
+  description: >-
+    Detections for identity-layer attacks against Snowflake accounts:
+    password-only (MFA-less) logins and brute-force / credential-stuffing
+    signals, authored against the ACCOUNT_USAGE.LOGIN_HISTORY view.
+  license: Apache-2.0
+  authors:
+    - name: DPS Examples Working Group
+  tags: [snowflake, identity, mfa, brute-force]
+
+spec:
+  category: credential_access
+  severity: high
+
+  telemetry:
+    - product: snowflake
+      service: login_history
+      description: "SNOWFLAKE.ACCOUNT_USAGE.LOGIN_HISTORY view (up to 2h ingest latency)"
+      requiredFields:
+        - name: IS_SUCCESS
+          type: string
+          canonical: event.outcome
+        - name: FIRST_AUTHENTICATION_FACTOR
+          type: string
+          canonical: authentication.factor.first
+        - name: ERROR_MESSAGE
+          type: string
+          canonical: error.message
+        - name: USER_NAME
+          type: string
+          canonical: user.name
+        - name: CLIENT_IP
+          type: ip
+          canonical: source.ip
+      latencyNote: "ACCOUNT_USAGE views lag; not suitable for sub-hour SLAs"
+
+  rules:
+    - path: rules/password-only-login.yml
+      id: 1c9a7f3e-5b21-4d0e-8a4f-0e1d2c3b4a01
+    - path: rules/failed-login-bad-credentials.yml
+      id: 1c9a7f3e-5b21-4d0e-8a4f-0e1d2c3b4a02
+
+  targets:
+    - platform: snowflake
+      profile: dps-flat-v1
