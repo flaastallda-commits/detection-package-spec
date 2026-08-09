@@ -1,0 +1,26 @@
+title: Snowflake Mass Data Unload
+id: 3e7c5d2a-9b43-4e0f-8c6d-2a3b4c5d6e01
+status: stable
+description: >-
+  Detect data-unload statements (QUERY_TYPE = UNLOAD, i.e. COPY INTO
+  <stage/location>) which write table contents out to stages or external
+  cloud storage — the primary bulk-exfiltration channel in Snowflake.
+logsource:
+  product: snowflake
+  service: query_history
+detection:
+  selection:
+    QUERY_TYPE: 'UNLOAD'
+  condition: selection
+falsepositives:
+  - Approved ETL/backup pipelines (filter by known service roles downstream)
+level: high
+tags:
+  - attack.exfiltration
+  - attack.t1567.002
+  - attack.t1048
+x-dps-investigation:
+  - Identify user, role, and warehouse that ran the unload
+  - Determine target stage/location and data volume (BYTES_WRITTEN)
+  - Check whether the destination is an approved internal stage or an external URL
+  - Suspend the user and rotate credentials if unauthorised
