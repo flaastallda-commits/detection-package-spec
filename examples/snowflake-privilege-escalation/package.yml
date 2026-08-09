@@ -1,0 +1,47 @@
+apiVersion: dps/v1
+kind: DetectionPackage
+
+metadata:
+  name: snowflake-privilege-escalation
+  version: 1.0.0
+  title: "Snowflake Privilege Escalation"
+  description: >-
+    Detections for high-privilege role grants (ACCOUNTADMIN, SECURITYADMIN)
+    in Snowflake — classic post-compromise escalation and persistence moves,
+    authored against the ACCOUNT_USAGE.QUERY_HISTORY view. Each privileged
+    role is a separate rule (the dps-flat-v1 profile forbids value lists to
+    keep OR-semantics honest across translators).
+  license: Apache-2.0
+  authors:
+    - name: DPS Examples Working Group
+  tags: [snowflake, privilege-escalation]
+
+spec:
+  category: privilege_escalation
+  severity: critical
+
+  telemetry:
+    - product: snowflake
+      service: query_history
+      description: "SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY view (up to 45 min ingest latency)"
+      requiredFields:
+        - name: QUERY_TEXT
+          type: string
+          canonical: query.text
+        - name: USER_NAME
+          type: string
+          canonical: user.name
+        - name: ROLE_NAME
+          type: string
+          canonical: user.role
+      latencyNote: "ACCOUNT_USAGE views lag up to 45 minutes"
+
+  rules:
+    - path: rules/accountadmin-role-grant.yml
+      id: 2d8b6e4f-7a32-4c1d-9b5e-1f2a3b4c5d01
+    - path: rules/securityadmin-role-grant.yml
+      id: 2d8b6e4f-7a32-4c1d-9b5e-1f2a3b4c5d02
+
+  targets:
+    - platform: snowflake
+      profile: dps-flat-v1
