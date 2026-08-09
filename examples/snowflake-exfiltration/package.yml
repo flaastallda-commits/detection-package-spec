@@ -1,0 +1,56 @@
+apiVersion: dps/v1
+kind: DetectionPackage
+
+metadata:
+  name: snowflake-exfiltration
+  version: 1.0.0
+  title: "Snowflake Exfiltration"
+  description: >-
+    Detections for bulk data-exfiltration channels in Snowflake: data
+    unloads, external stage creation, data-share account additions, and
+    presigned URL generation — authored against the
+    ACCOUNT_USAGE.QUERY_HISTORY view.
+  license: Apache-2.0
+  authors:
+    - name: DPS Examples Working Group
+  tags: [snowflake, exfiltration, data-sharing]
+
+spec:
+  category: exfiltration
+  severity: critical
+
+  telemetry:
+    - product: snowflake
+      service: query_history
+      description: "SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY view (up to 45 min ingest latency)"
+      requiredFields:
+        - name: QUERY_TEXT
+          type: string
+          canonical: query.text
+        - name: QUERY_TYPE
+          type: string
+          canonical: query.type
+        - name: USER_NAME
+          type: string
+          canonical: user.name
+        - name: ROLE_NAME
+          type: string
+          canonical: user.role
+        - name: WAREHOUSE_NAME
+          type: string
+          canonical: warehouse.name
+      latencyNote: "ACCOUNT_USAGE views lag up to 45 minutes"
+
+  rules:
+    - path: rules/mass-data-unload.yml
+      id: 3e7c5d2a-9b43-4e0f-8c6d-2a3b4c5d6e01
+    - path: rules/external-stage-creation.yml
+      id: 3e7c5d2a-9b43-4e0f-8c6d-2a3b4c5d6e02
+    - path: rules/data-share-account-addition.yml
+      id: 3e7c5d2a-9b43-4e0f-8c6d-2a3b4c5d6e03
+    - path: rules/presigned-url-generation.yml
+      id: 3e7c5d2a-9b43-4e0f-8c6d-2a3b4c5d6e04
+
+  targets:
+    - platform: snowflake
+      profile: dps-flat-v1
