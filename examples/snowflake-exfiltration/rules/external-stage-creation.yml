@@ -1,0 +1,28 @@
+title: Snowflake External Stage Creation
+id: 3e7c5d2a-9b43-4e0f-8c6d-2a3b4c5d6e02
+status: stable
+description: >-
+  Detect creation of stages pointing at external cloud storage
+  (CREATE STAGE ... URL='s3://...' etc.). Attackers stage exfiltration by
+  first creating an external stage they control.
+logsource:
+  product: snowflake
+  service: query_history
+detection:
+  stage_created:
+    QUERY_TEXT|contains: 'CREATE STAGE'
+  external_url:
+    QUERY_TEXT|contains: 'URL='
+  condition: stage_created and external_url
+falsepositives:
+  - Data-engineering teams provisioning approved external stages
+level: high
+tags:
+  - attack.exfiltration
+  - attack.resource_development
+  - attack.t1567.002
+x-dps-investigation:
+  - Extract the stage URL and verify the bucket/container owner
+  - Check for follow-on COPY INTO statements targeting the stage
+  - Drop the stage if the destination is not organisation-owned
+  - Review storage integrations for unauthorised additions
