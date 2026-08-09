@@ -1,0 +1,26 @@
+title: Snowflake ACCOUNTADMIN Role Grant
+id: 2d8b6e4f-7a32-4c1d-9b5e-1f2a3b4c5d01
+status: stable
+description: >-
+  Detect grants of the ACCOUNTADMIN role — the highest privilege in a
+  Snowflake account. Unexpected grants are a classic privilege-escalation and
+  persistence move after account compromise.
+logsource:
+  product: snowflake
+  service: query_history
+detection:
+  selection:
+    QUERY_TEXT|contains: 'GRANT ROLE ACCOUNTADMIN'
+  condition: selection
+falsepositives:
+  - Planned admin onboarding (verify via change ticket)
+level: critical
+tags:
+  - attack.privilege_escalation
+  - attack.persistence
+  - attack.t1098.003
+x-dps-investigation:
+  - Identify the granting user, role, and target user
+  - Verify against an approved change request
+  - Revoke the grant if unauthorised and review the grantor's session history
+  - Audit GRANTS_TO_USERS for other recent high-privilege grants
