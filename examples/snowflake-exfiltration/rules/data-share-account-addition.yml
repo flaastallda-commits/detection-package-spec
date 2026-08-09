@@ -1,0 +1,27 @@
+title: Snowflake Data Share Account Addition
+id: 3e7c5d2a-9b43-4e0f-8c6d-2a3b4c5d6e03
+status: stable
+description: >-
+  Detect ALTER SHARE ... ADD ACCOUNTS statements that expose shared data to
+  another Snowflake account. Adding an attacker-controlled account to a share
+  is silent, high-bandwidth exfiltration.
+logsource:
+  product: snowflake
+  service: query_history
+detection:
+  share_alter:
+    QUERY_TEXT|contains: 'ALTER SHARE'
+  accounts_added:
+    QUERY_TEXT|contains: 'ADD ACCOUNTS'
+  condition: share_alter and accounts_added
+falsepositives:
+  - Approved partner data-sharing onboarding
+level: critical
+tags:
+  - attack.exfiltration
+  - attack.t1537
+x-dps-investigation:
+  - Identify the share and the account locator(s) added
+  - Verify the consumer account belongs to an approved partner
+  - Remove unauthorised accounts from the share immediately
+  - Audit which objects the share exposes and access since the change
