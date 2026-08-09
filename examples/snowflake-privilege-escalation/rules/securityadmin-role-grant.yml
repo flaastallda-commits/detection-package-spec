@@ -1,0 +1,25 @@
+title: Snowflake SECURITYADMIN Role Grant
+id: 2d8b6e4f-7a32-4c1d-9b5e-1f2a3b4c5d02
+status: stable
+description: >-
+  Detect grants of the SECURITYADMIN role, which can manage all grants and
+  users in the account. A quieter alternative to ACCOUNTADMIN for attackers
+  establishing durable control.
+logsource:
+  product: snowflake
+  service: query_history
+detection:
+  selection:
+    QUERY_TEXT|contains: 'GRANT ROLE SECURITYADMIN'
+  condition: selection
+falsepositives:
+  - Planned security-team onboarding
+level: high
+tags:
+  - attack.privilege_escalation
+  - attack.persistence
+  - attack.t1098.003
+x-dps-investigation:
+  - Identify grantor and grantee
+  - Verify against an approved change request
+  - Revoke if unauthorised; review grants made by the grantee since
