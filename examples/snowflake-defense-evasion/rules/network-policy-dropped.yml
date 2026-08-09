@@ -1,0 +1,25 @@
+title: Snowflake Network Policy Dropped
+id: 4f6d4c1b-8a54-4f1e-9d7c-3b4c5d6e7f02
+status: stable
+description: >-
+  Detect DROP NETWORK POLICY statements. Removing a network policy lifts IP
+  allow-listing for the whole account or user, and is a hallmark of an
+  attacker widening access before bulk exfiltration.
+logsource:
+  product: snowflake
+  service: query_history
+detection:
+  selection:
+    QUERY_TEXT|contains: 'DROP NETWORK POLICY'
+  condition: selection
+falsepositives:
+  - Planned network-policy consolidation
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.t1562.007
+x-dps-investigation:
+  - Identify who dropped the policy and from which IP
+  - Check LOGIN_HISTORY for logins from new IPs after the drop
+  - Recreate the policy and re-attach it to the account/users
+  - Review the actor's other recent administrative statements
