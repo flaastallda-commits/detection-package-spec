@@ -1,0 +1,42 @@
+apiVersion: dps/v1
+kind: DetectionPackage
+
+metadata:
+  name: snowflake-defense-evasion
+  version: 1.0.0
+  title: "Snowflake Defense Evasion"
+  description: >-
+    Detections for attempts to weaken Snowflake account defenses: MFA bypass
+    windows set on users, and network-policy removal — authored against the
+    ACCOUNT_USAGE.QUERY_HISTORY view.
+  license: Apache-2.0
+  authors:
+    - name: DPS Examples Working Group
+  tags: [snowflake, defense-evasion, mfa-bypass, network-policy]
+
+spec:
+  category: defense_evasion
+  severity: high
+
+  telemetry:
+    - product: snowflake
+      service: query_history
+      description: "SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY view (up to 45 min ingest latency)"
+      requiredFields:
+        - name: QUERY_TEXT
+          type: string
+          canonical: query.text
+        - name: USER_NAME
+          type: string
+          canonical: user.name
+      latencyNote: "ACCOUNT_USAGE views lag up to 45 minutes"
+
+  rules:
+    - path: rules/mfa-bypass-window-set.yml
+      id: 4f6d4c1b-8a54-4f1e-9d7c-3b4c5d6e7f01
+    - path: rules/network-policy-dropped.yml
+      id: 4f6d4c1b-8a54-4f1e-9d7c-3b4c5d6e7f02
+
+  targets:
+    - platform: snowflake
+      profile: dps-flat-v1
